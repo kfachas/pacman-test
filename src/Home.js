@@ -213,7 +213,6 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
             }
           }
         } catch (error) {
-          // console.log("error for ghostId : ", ghost.id + " | " + error.message);
         }
       });
 

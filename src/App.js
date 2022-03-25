@@ -144,7 +144,6 @@ function App() {
        arr.push({x: index, y})
      }
     }))
-    console.log(arr)
     setCoins(arr)
 
     setTimeout(() => setLoading(false), 950);

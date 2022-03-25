@@ -1,4 +1,19 @@
-export const DEFAULT_MATRIX = [
+const maxY = 11;
+const maxX = 16;
+
+  const arr = Array.from({length: maxY}, () => Array.from({length: maxX}, () => 0))
+arr.forEach((elem, i) => elem.forEach((e, index) => {
+if (index % 2 === 0 && i % 2 === 0) {
+  arr[i][index] = 1;
+}
+}))
+const getShortedDistance =(distances, visited) => {
+
+}
+
+export const DEFAULT_MATRIX = arr;
+
+const test = [
   [0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0],
   [0, 1, 0, 0, 0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 1, 0],
   [0, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0],
@@ -11,6 +26,10 @@ export const DEFAULT_MATRIX = [
   [0, 1, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0],
   [0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
 ];
+
+
+
+
 
 export const PACMAN_SPEED = 200;
 export const GHOST_SPEED = 300;
