@@ -165,7 +165,9 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
             return newCoins;
           });
         }
+        ghosts.forEach((ghost) => ghost.clearVisited())
         player.updatePosition(x, y);
+        player
         setRefreshPositionsGhosts((prev) => !prev);
       }
     }, 500);
@@ -176,43 +178,9 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
     return dist;
   }
 
-  const getNewDistances = () => {
-    const { x: testX, y: testY } = player.data;
-
-    const arr = [];
-    DEFAULT_MATRIX.forEach((elem, y) =>
-      elem.forEach((e, x) => {
-        if (e === 0) {
-          const distancePlayerX = testX - x;
-          const distancePlayerY = testY - y;
-
-          arr.push({
-            x,
-            y,
-            distance: manhattanDist(distancePlayerX, distancePlayerY),
-          });
-        }
-      })
-    );
-    return arr;
-  };
-
-  // const getNearestCases = (arr, entity) => {
-  //   const nearestCases = arr.filter(
-  //     (e) =>
-  //       e.distance === entity.distance - 1 &&
-  //       (e.x === entity.x - 1 || e.y === entity.y - 1)
-  //   );
-  //   return nearestCases;
-  // };
-
-  // function isContained(arr, obj) {
-  //   return arr.some((value) => value.x === obj.x && value.y === obj.y);
-  // }
-
   // get all possible next moves
   function getAdjacences(point) {
-    const { x: testX, y: testY } = player.data;
+    const { x: playerX, y: playerY } = player.data;
 
     const { x, y } = point;
     if (typeof point !== "undefined") {
@@ -235,8 +203,8 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
         },
       ];
       adj = adj.map((e) => {
-        const distancePlayerX = testX - e.x;
-        const distancePlayerY = testY - e.y;
+        const distancePlayerX = playerX - e.x;
+        const distancePlayerY = playerY - e.y;
 
         return {
           ...e,
@@ -257,51 +225,76 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
     }
   }
 
+  function notInMap(y, x) {
+    return !(DEFAULT_MATRIX[y] && typeof DEFAULT_MATRIX[y][x] === "number" && DEFAULT_MATRIX[y][x] === 0)
+  }
   // get shortest road
-  const getShortestRoad = (entity) => {
-    const { x: testX, y: testY } = player.data;
-    const arr = getNewDistances();
-    if (entity.x === testX && entity.y === testY) {
-      return null;
-    }
+  const getShortestRoad = (entity) => {    
+    let dRow = [-1, 1, 0, 0]
+    let dCol = [0, 0, -1, 1]
+    const visited = [{ x: entity.x, y: entity.y}];
+    const Q = [{ x: entity.x, y: entity.y  }]
+   
+    let distance = Array(DEFAULT_MATRIX.length).fill().map(() => Array(DEFAULT_MATRIX[0].length).fill(-1))
+    distance[entity.y][entity.x] = 0;
 
-    const entityDistance = arr.find(
-      (e) => e.x === entity.x && e.y === entity.y
-    ).distance;
-
-    const visited = [{ x: entity.x, y: entity.y }];
-
-    const nearestCases = getAdjacences(entity).filter((elem) => {
-      return !visited.find((e) => elem.x === e.x && elem.y === e.y);
-    });
-    // .sort((a, b) => a.x < b.x && a.y < b.y)
-    console.log({ visited });
-
-    const Q = [];
-    while (Q.length) {}
-
+      while (Q.length > 0) {
+        let cur = Q.shift();
+        let row = cur.x;
+        let col = cur.y;
+        for (let k = 0; k < 4; k++) {
+          let newRow = row + dRow[k];
+          let newCol = col + dCol[k];
+          if (!visited.find((e) => e.x === newRow && e.y === newCol) && !notInMap(newCol, newRow)) {
+            visited.push({x: newRow, y: newCol});
+            distance[newCol][newRow] = distance[col][row] + 1;
+            Q.push({x: newRow, y: newCol})
+          }
+        }
+      }
+      
     if (entity.updateDistance) {
-      entity.updateDistance(entityDistance);
+      entity.updateDistance(distance[entity.y][entity.x]);
     }
 
-    if (entity.updatePosition && nearestCases.length > 0) {
-      entity.updatePosition(nearestCases[0].x, nearestCases[0].y);
+   // console.log("** start **")
+    entity.updateVisited({x: entity.x, y: entity.y})
+
+   // console.log("position : ", entity.y, entity.x)
+    let nearestCases = getAdjacences(entity).filter((e) => !entity.visited.find(o => o.x === e.x && o.y === e.y));
+   // console.log("nearest cases... ", nearestCases)
+    const bestdistance = Math.min(...nearestCases.map(o => o.distance))
+    const findBestCase = nearestCases.find((e) => e.distance === bestdistance)
+
+  //  console.log("best case : ", findBestCase)
+  //  console.log("visited...", entity.visited)
+  //  console.log("** end **")
+
+    const anotherGhost = ghosts.find((e) => e.id !== entity.id && e.x === findBestCase.x && e.y === findBestCase.y)
+
+    if (entity.updatePosition && nearestCases.length > 0 && !anotherGhost) {
+      if (player.x === findBestCase.x && player.y === findBestCase.y) {
+        if (player.lifes > 1) {
+          player.loseLife()
+        } else {
+          player.loseGame()
+        }
+        
+      }
+      entity.updatePosition(findBestCase.x, findBestCase.y);
+    } else {
+      entity.updatePosition(findBestCase.x, findBestCase.y)
     }
-
-    console.log(`nearest cases ${nearestCases.length} : `, nearestCases);
-    // const process = (nearest) => {
-
-    // };
   };
 
   useEffect(() => {
     setInterval(() => {
       ghosts.forEach((ghost) => {
-        if (!ghost.distance || ghost.distance >= 24) {
+
           getShortestRoad(ghost);
-        }
+      
       });
-    }, 1500);
+    },1000);
 
     // setInterval(() => {
     //   ghosts.forEach((ghost) => {
@@ -343,8 +336,20 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
     //   setRefreshPositionsGhosts((prev) => !prev);
     // }, 1000);
   }, []);
+
+  useEffect(() => {
+    const canvas = document.querySelector("canvas");
+    const context = canvas.getContext("2d")
+
+    context.beginPath()
+    DEFAULT_MATRIX.forEach((row, y) => row.forEach((elem, x) => {
+      context.fillRect(x, y, 15, 15)
+    }))
+    
+  }, [])
+
   return (
-    <div style={{ height: "50%" }}>
+    <canvas style={{ height: 400, width: "80%" }}>
       <div
         style={{
           display: "flex",
@@ -383,7 +388,7 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
           })}
         </div>
       </div>
-    </div>
+    </canvas>
   );
 };
 

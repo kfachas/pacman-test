@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { getRandomNum, DEFAULT_MATRIX } from "./constants";
 
 import Home from "./components/Home";
+import { createPortal } from "react-dom";
 
 // // reducer
 // const initialState = {
@@ -53,10 +54,59 @@ class Ghost {
     this.distance = null;
     this.speed = 1000;
     this.followPacman = false;
+    this.visited = []
   }
 
   get data() {
     return { x: this.x, y: this.y };
+  }
+
+  updateVisited(newPos) {
+    this.visited.push({x: newPos.x, y: newPos.y})
+  }
+  clearVisited() {
+    this.visited = []
+  }
+
+
+  updatePosition(newX, newY) {
+    this.y = newY;
+    this.x = newX;
+  }
+  updateDistance(distance) {
+    this.distance = distance;
+  }
+
+  updateDirection(direction) {
+    this.direction = direction;
+  }
+}
+
+class Player {
+  constructor(id, positionX, positionY) {
+    this.id = id;
+    this.x = positionX;
+    this.y = positionY;
+    this.direction = null;
+    this.distance = null;
+    this.speed = 1000;
+    this.lifes = 3;
+    this.lose = false;
+    this.win = false;
+  }
+
+  get data() {
+    return { x: this.x, y: this.y };
+  }
+
+  loseLife() {
+    this.lifes -= 1;
+  }
+  loseGame() {
+    this.lose = true;
+  }
+  winGame() {
+    this.win = true;
   }
 
   updatePosition(newX, newY) {
@@ -91,13 +141,13 @@ const getSpawnPoint = () => {
 function App() {
   const [loading, setLoading] = useState(true);
   const [scoreNb, setScoreNb] = useState(0);
-  const [lifes] = useState(3);
   const [ghosts, setGhosts] = useState([]);
   const [coins, setCoins] = useState([]);
   const [time, setTime] = useState(getTime());
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const [player] = useState(new Ghost(5, 0, 0));
+  const playerRef = useRef(new Player(5, 0, 0));
+  const player = playerRef.current
 
   const moveRef = useRef();
 
@@ -140,27 +190,25 @@ function App() {
   }, [coins]);
 
   useEffect(() => {
-    // if (isPlaying) {
-    // for (let i = 1; i <= 4; i++) {
-    //   let elem = getSpawnPoint();
-    //   while (!elem) {
-    //     elem = getSpawnPoint();
-    //   }
+     if (isPlaying) {
+     for (let i = 1; i <= 4; i++) {
+       let elem = getSpawnPoint();
+       while (!elem) {
+         elem = getSpawnPoint();
+       }
 
-    //   const alreadyGhost = ghosts.some(
-    //     (ghost) => ghost.positionX === elem.x && ghost.positionY === elem.y
-    //   );
-    //   if (alreadyGhost) {
-    //     elem = getSpawnPoint();
-    //   }
+       const alreadyGhost = ghosts.some(
+         (ghost) => ghost.positionX === elem.x && ghost.positionY === elem.y
+       );
+       if (alreadyGhost) {
+         elem = getSpawnPoint();
+       }
 
-    //   const newGhost = new Ghost(i, elem.x, elem.y);
+       const newGhost = new Ghost(i, elem.x, elem.y);
 
-    //   setGhosts((prev) => [...prev, newGhost]);
-    // }
-    setGhosts([
-      new Ghost(1, DEFAULT_MATRIX[0].length - 1, DEFAULT_MATRIX.length - 1),
-    ]);
+       setGhosts((prev) => [...prev, newGhost]);
+     }
+
 
     const arr = [];
     DEFAULT_MATRIX.forEach((elem, y) =>
@@ -173,22 +221,23 @@ function App() {
     setCoins(arr);
 
     setTimeout(() => setLoading(false), 950);
-    // }
+     }
   }, [isPlaying]);
 
   return (
     <div
       style={{ height: "100%" }}
-      onKeyDown={(e) => handleKeyPlayer(e.code)}
+      onKeyDown={(e) => !player.lose && handleKeyPlayer(e.code)}
       tabIndex={0}
     >
       <div style={{ textAlign: "center", width: "100%", paddingTop: 12 }}>
         {time}
       </div>
-      {/* {!isPlaying && (
+     {!isPlaying && (
         <button onClick={() => setIsPlaying(true)}>CLIQUER POUR JOUER</button>
-      )} */}
-      {/* {isPlaying && ( */}
+      )}
+      {player.lose && <div style={{position: "absolute", "left": "45%", top: "45%"}}>VOUS AVEZ PERDU</div>}
+    {isPlaying && (
       <div style={{ height: "70%" }}>
         <div
           style={{
@@ -200,7 +249,7 @@ function App() {
         >
           <span>Score : {scoreNb}</span>
           <div style={{ margin: "0 12px" }}>|</div>
-          <span>Vies : {lifes}</span>
+          <span>Vies : {player.lifes}</span>
         </div>
         <div>
           {loading && "chargement...."}
@@ -216,7 +265,7 @@ function App() {
           )}
         </div>
       </div>
-      {/* )} */}
+     )} 
     </div>
   );
 }
