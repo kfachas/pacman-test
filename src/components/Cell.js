@@ -1,24 +1,15 @@
 import React from "react";
-import ghost_1 from "./images/G1.gif";
-import ghost_2 from "./images/G2.gif";
-import ghost_3 from "./images/G3.gif";
-import ghost_4 from "./images/G4.gif";
-import brique from "./brique.jpg"
-import coin from "./bit.gif"
+
+import ghost_1 from "../images/G1.gif";
+import canBeEat from "../images/canBeEat.gif";
+import coin from "../images/bitcoin.png";
 
 import Pacman from "./Pacman";
 
 const MOVE_UP = "MOVE_UP";
 const MOVE_DOWN = "MOVE_DOWN";
 const MOVE_LEFT = "MOVE_LEFT";
-// const MOVE_RIGHT = "MOVE_RIGHT";
-
-const ghostIcons = {
-  1: { img: ghost_1 },
-  2: { img: ghost_2 },
-  3: { img: ghost_3 },
-  4: { img: ghost_4 },
-};
+// const MOVE_RIGHT = "MOVE_RIGHT"; default is MOVE RIGHT so dont need it
 
 const styles = {
   ghostStyle: {
@@ -28,11 +19,19 @@ const styles = {
   },
 };
 
-const Cell = ({ ghost, isPacman = null, direction = null, content, isCoin }) => {
+const Cell = ({
+  ghost,
+  isPacman = null,
+  direction = null,
+  content,
+  isCoin,
+}) => {
   let cellContent = null;
 
   if (isCoin) {
-    cellContent = <img src={coin} alt="bitcoin" style={{height: 17, width: 17}}  />
+    cellContent = (
+      <img src={coin} alt="bitcoin" style={{ height: 10, width: 10 }} />
+    );
   }
   if (isPacman) {
     let rotate = "0deg";
@@ -60,14 +59,21 @@ const Cell = ({ ghost, isPacman = null, direction = null, content, isCoin }) => 
   } else if (content === 0 && ghost) {
     cellContent = (
       <img
-        src={ghostIcons[ghost.id].img}
+        src={ghost_1}
         style={styles.ghostStyle}
         alt={`ghost icon ${ghost.id}`}
       />
     );
   } else if (content === 1) {
     cellContent = (
-        <div style={{height: 30, width: "100%", objectFit: "cover",  backgroundColor: "#4040BF" }}/>
+      <div
+        style={{
+          height: 30,
+          width: "100%",
+          objectFit: "cover",
+          backgroundColor: "#4040BF",
+        }}
+      />
     );
   }
   return (
@@ -79,7 +85,7 @@ const Cell = ({ ghost, isPacman = null, direction = null, content, isCoin }) => 
         borderWidth: 0.5,
         display: "flex",
         alignItems: "center",
-        justifyContent: "center"
+        justifyContent: "center",
       }}
     >
       {cellContent}
