@@ -14,7 +14,7 @@ const createWindow = () => {
 
   // and load the url of the app.
   // mainWindow.loadURL("https://papaya-sable-39fe03.netlify.app");
-  mainWindow.loadURL("http://localhost:3000");
+  mainWindow.loadURL("http://localhost:3001");
   // Open the DevTools.
   mainWindow.webContents.openDevTools();
 };

@@ -9,3 +9,7 @@
   width: 100vw;
   background-color: gray;
 }
+
+canvas {
+  border: 20px solid #4040bf;
+}

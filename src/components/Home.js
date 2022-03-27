@@ -3,133 +3,132 @@ import React, { useEffect, useState } from "react";
 import Cell from "../components/Cell";
 import { DEFAULT_MATRIX, getRandomNum } from "../constants";
 
-const getDirectionOfGhost = ({ ghostPosition, actualDirection = null }) => {
-  let randomNb = getRandomNum(4);
+// const getDirectionOfGhost = ({ ghostPosition, actualDirection = null }) => {
+//   let randomNb = getRandomNum(4);
 
-  const randomIntersection = getRandomNum(2);
-  let direction;
-  const ghostX = ghostPosition.x;
-  const ghostY = ghostPosition.y;
+//   const randomIntersection = getRandomNum(2);
+//   let direction;
+//   const ghostX = ghostPosition.x;
+//   const ghostY = ghostPosition.y;
 
-  if (actualDirection) {
-    switch (actualDirection) {
-      case "U":
-        randomNb = 0;
-        break;
-      case "L":
-        randomNb = 1;
-        break;
-      case "R":
-        randomNb = 2;
-        break;
-      case "D":
-        randomNb = 3;
-        break;
-      default:
-        break;
-    }
-  }
+//   if (actualDirection) {
+//     switch (actualDirection) {
+//       case "U":
+//         randomNb = 0;
+//         break;
+//       case "L":
+//         randomNb = 1;
+//         break;
+//       case "R":
+//         randomNb = 2;
+//         break;
+//       case "D":
+//         randomNb = 3;
+//         break;
+//       default:
+//         break;
+//     }
+//   }
 
-  switch (randomNb) {
-    case 0: // up
-      if (
-        DEFAULT_MATRIX[ghostY - 1] &&
-        typeof DEFAULT_MATRIX[ghostY - 1][ghostX] === "number" &&
-        DEFAULT_MATRIX[ghostY - 1][ghostX] === 0
-      ) {
-        if (
-          DEFAULT_MATRIX[ghostY - 1][ghostX + 1] === 0 &&
-          randomIntersection === 1
-        ) {
-          direction = "R";
-        } else if (
-          DEFAULT_MATRIX[ghostY - 1][ghostX - 1] === 0 &&
-          randomIntersection === 1
-        ) {
-          direction = "L";
-        } else {
-          direction = "U";
-        }
-      }
-      break;
-    case 1: // left
-      if (
-        typeof DEFAULT_MATRIX[ghostY][ghostX - 1] === "number" &&
-        DEFAULT_MATRIX[ghostY][ghostX - 1] === 0
-      ) {
-        if (
-          typeof DEFAULT_MATRIX[ghostY + 1][ghostX] === "number" &&
-          DEFAULT_MATRIX[ghostY + 1][ghostX] === 0 &&
-          randomIntersection === 1
-        ) {
-          direction = "D";
-        } else if (
-          typeof DEFAULT_MATRIX[ghostY - 1][ghostX] === "number" &&
-          DEFAULT_MATRIX[ghostY - 1][ghostX] === 0 &&
-          randomIntersection === 1
-        ) {
-          direction = "U";
-        } else {
-          direction = "L";
-        }
-      }
-      break;
-    case 2: // right
-      if (
-        typeof DEFAULT_MATRIX[ghostY][ghostX + 1] === "number" &&
-        DEFAULT_MATRIX[ghostY][ghostX + 1] === 0
-      ) {
-        if (
-          typeof DEFAULT_MATRIX[ghostY + 1][ghostX] === "number" &&
-          DEFAULT_MATRIX[ghostY + 1][ghostX] === 0 &&
-          randomIntersection === 1
-        ) {
-          direction = "D";
-        } else if (
-          typeof DEFAULT_MATRIX[ghostY - 1][ghostX] === "number" &&
-          DEFAULT_MATRIX[ghostY - 1][ghostX] === 0 &&
-          randomIntersection === 1
-        ) {
-          direction = "U";
-        } else {
-          direction = "R";
-        }
-      }
-      break;
-    case 3: // down
-      if (
-        DEFAULT_MATRIX[ghostY + 1] &&
-        DEFAULT_MATRIX[ghostY + 1][ghostX] === 0
-      ) {
-        if (
-          DEFAULT_MATRIX[ghostY + 1][ghostX + 1] === 0 &&
-          randomIntersection === 1
-        ) {
-          direction = "R";
-        } else if (
-          DEFAULT_MATRIX[ghostY + 1][ghostX - 1] === 0 &&
-          randomIntersection === 1
-        ) {
-          direction = "L";
-        } else {
-          direction = "D";
-        }
-      }
-      break;
-    default:
-      break;
-  }
+//   switch (randomNb) {
+//     case 0: // up
+//       if (
+//         DEFAULT_MATRIX[ghostY - 1] &&
+//         typeof DEFAULT_MATRIX[ghostY - 1][ghostX] === "number" &&
+//         DEFAULT_MATRIX[ghostY - 1][ghostX] === 0
+//       ) {
+//         if (
+//           DEFAULT_MATRIX[ghostY - 1][ghostX + 1] === 0 &&
+//           randomIntersection === 1
+//         ) {
+//           direction = "R";
+//         } else if (
+//           DEFAULT_MATRIX[ghostY - 1][ghostX - 1] === 0 &&
+//           randomIntersection === 1
+//         ) {
+//           direction = "L";
+//         } else {
+//           direction = "U";
+//         }
+//       }
+//       break;
+//     case 1: // left
+//       if (
+//         typeof DEFAULT_MATRIX[ghostY][ghostX - 1] === "number" &&
+//         DEFAULT_MATRIX[ghostY][ghostX - 1] === 0
+//       ) {
+//         if (
+//           typeof DEFAULT_MATRIX[ghostY + 1][ghostX] === "number" &&
+//           DEFAULT_MATRIX[ghostY + 1][ghostX] === 0 &&
+//           randomIntersection === 1
+//         ) {
+//           direction = "D";
+//         } else if (
+//           typeof DEFAULT_MATRIX[ghostY - 1][ghostX] === "number" &&
+//           DEFAULT_MATRIX[ghostY - 1][ghostX] === 0 &&
+//           randomIntersection === 1
+//         ) {
+//           direction = "U";
+//         } else {
+//           direction = "L";
+//         }
+//       }
+//       break;
+//     case 2: // right
+//       if (
+//         typeof DEFAULT_MATRIX[ghostY][ghostX + 1] === "number" &&
+//         DEFAULT_MATRIX[ghostY][ghostX + 1] === 0
+//       ) {
+//         if (
+//           typeof DEFAULT_MATRIX[ghostY + 1][ghostX] === "number" &&
+//           DEFAULT_MATRIX[ghostY + 1][ghostX] === 0 &&
+//           randomIntersection === 1
+//         ) {
+//           direction = "D";
+//         } else if (
+//           typeof DEFAULT_MATRIX[ghostY - 1][ghostX] === "number" &&
+//           DEFAULT_MATRIX[ghostY - 1][ghostX] === 0 &&
+//           randomIntersection === 1
+//         ) {
+//           direction = "U";
+//         } else {
+//           direction = "R";
+//         }
+//       }
+//       break;
+//     case 3: // down
+//       if (
+//         DEFAULT_MATRIX[ghostY + 1] &&
+//         DEFAULT_MATRIX[ghostY + 1][ghostX] === 0
+//       ) {
+//         if (
+//           DEFAULT_MATRIX[ghostY + 1][ghostX + 1] === 0 &&
+//           randomIntersection === 1
+//         ) {
+//           direction = "R";
+//         } else if (
+//           DEFAULT_MATRIX[ghostY + 1][ghostX - 1] === 0 &&
+//           randomIntersection === 1
+//         ) {
+//           direction = "L";
+//         } else {
+//           direction = "D";
+//         }
+//       }
+//       break;
+//     default:
+//       break;
+//   }
 
-  if (!direction) {
-    getDirectionOfGhost({ ghostPosition });
-  }
+//   if (!direction) {
+//     getDirectionOfGhost({ ghostPosition });
+//   }
 
-  return direction;
-};
+//   return direction;
+// };
 
-const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
+const Home = ({ ghosts, coins, setCoins, moveRef, player }) => {
   const [, setRefreshPositionsGhosts] = useState(false);
-
   const { x: playerX, y: playerY } = player.data;
 
   useEffect(() => {
@@ -165,9 +164,9 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
             return newCoins;
           });
         }
-        ghosts.forEach((ghost) => ghost.clearVisited())
+        ghosts.forEach((ghost) => ghost.clearVisited());
         player.updatePosition(x, y);
-        player
+        player;
         setRefreshPositionsGhosts((prev) => !prev);
       }
     }, 500);
@@ -226,75 +225,87 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
   }
 
   function notInMap(y, x) {
-    return !(DEFAULT_MATRIX[y] && typeof DEFAULT_MATRIX[y][x] === "number" && DEFAULT_MATRIX[y][x] === 0)
+    return !(
+      DEFAULT_MATRIX[y] &&
+      typeof DEFAULT_MATRIX[y][x] === "number" &&
+      DEFAULT_MATRIX[y][x] === 0
+    );
   }
+
   // get shortest road
-  const getShortestRoad = (entity) => {    
-    let dRow = [-1, 1, 0, 0]
-    let dCol = [0, 0, -1, 1]
-    const visited = [{ x: entity.x, y: entity.y}];
-    const Q = [{ x: entity.x, y: entity.y  }]
-   
-    let distance = Array(DEFAULT_MATRIX.length).fill().map(() => Array(DEFAULT_MATRIX[0].length).fill(-1))
+  const getShortestRoad = (entity) => {
+    let dRow = [-1, 1, 0, 0];
+    let dCol = [0, 0, -1, 1];
+    const visited = [{ x: entity.x, y: entity.y }];
+    const Q = [{ x: entity.x, y: entity.y }];
+
+    let distance = Array(DEFAULT_MATRIX.length)
+      .fill()
+      .map(() => Array(DEFAULT_MATRIX[0].length).fill(-1));
     distance[entity.y][entity.x] = 0;
 
-      while (Q.length > 0) {
-        let cur = Q.shift();
-        let row = cur.x;
-        let col = cur.y;
-        for (let k = 0; k < 4; k++) {
-          let newRow = row + dRow[k];
-          let newCol = col + dCol[k];
-          if (!visited.find((e) => e.x === newRow && e.y === newCol) && !notInMap(newCol, newRow)) {
-            visited.push({x: newRow, y: newCol});
-            distance[newCol][newRow] = distance[col][row] + 1;
-            Q.push({x: newRow, y: newCol})
-          }
+    while (Q.length > 0) {
+      let cur = Q.shift();
+      let row = cur.x;
+      let col = cur.y;
+      for (let k = 0; k < 4; k++) {
+        let newRow = row + dRow[k];
+        let newCol = col + dCol[k];
+        if (
+          !visited.find((e) => e.x === newRow && e.y === newCol) &&
+          !notInMap(newCol, newRow)
+        ) {
+          visited.push({ x: newRow, y: newCol });
+          distance[newCol][newRow] = distance[col][row] + 1;
+          Q.push({ x: newRow, y: newCol });
         }
       }
-      
+    }
+
     if (entity.updateDistance) {
       entity.updateDistance(distance[entity.y][entity.x]);
     }
 
-   // console.log("** start **")
-    entity.updateVisited({x: entity.x, y: entity.y})
+    // console.log("** start **")
+    entity.updateVisited({ x: entity.x, y: entity.y });
 
-   // console.log("position : ", entity.y, entity.x)
-    let nearestCases = getAdjacences(entity).filter((e) => !entity.visited.find(o => o.x === e.x && o.y === e.y));
-   // console.log("nearest cases... ", nearestCases)
-    const bestdistance = Math.min(...nearestCases.map(o => o.distance))
-    const findBestCase = nearestCases.find((e) => e.distance === bestdistance)
+    // console.log("position : ", entity.y, entity.x)
+    let nearestCases = getAdjacences(entity).filter(
+      (e) => !entity.visited.find((o) => o.x === e.x && o.y === e.y)
+    );
+    // console.log("nearest cases... ", nearestCases)
+    const bestdistance = Math.min(...nearestCases.map((o) => o.distance));
+    const findBestCase = nearestCases.find((e) => e.distance === bestdistance);
 
-  //  console.log("best case : ", findBestCase)
-  //  console.log("visited...", entity.visited)
-  //  console.log("** end **")
+    //  console.log("best case : ", findBestCase)
+    //  console.log("visited...", entity.visited)
+    //  console.log("** end **")
 
-    const anotherGhost = ghosts.find((e) => e.id !== entity.id && e.x === findBestCase.x && e.y === findBestCase.y)
+    const anotherGhost = ghosts.find(
+      (e) =>
+        e.id !== entity.id && e.x === findBestCase.x && e.y === findBestCase.y
+    );
 
     if (entity.updatePosition && nearestCases.length > 0 && !anotherGhost) {
       if (player.x === findBestCase.x && player.y === findBestCase.y) {
         if (player.lifes > 1) {
-          player.loseLife()
+          player.loseLife();
         } else {
-          player.loseGame()
+          player.loseGame();
         }
-        
       }
       entity.updatePosition(findBestCase.x, findBestCase.y);
     } else {
-      entity.updatePosition(findBestCase.x, findBestCase.y)
+      entity.updatePosition(findBestCase.x, findBestCase.y);
     }
   };
 
   useEffect(() => {
     setInterval(() => {
       ghosts.forEach((ghost) => {
-
-          getShortestRoad(ghost);
-      
+        getShortestRoad(ghost);
       });
-    },1000);
+    }, 1000);
 
     // setInterval(() => {
     //   ghosts.forEach((ghost) => {
@@ -337,19 +348,8 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
     // }, 1000);
   }, []);
 
-  useEffect(() => {
-    const canvas = document.querySelector("canvas");
-    const context = canvas.getContext("2d")
-
-    context.beginPath()
-    DEFAULT_MATRIX.forEach((row, y) => row.forEach((elem, x) => {
-      context.fillRect(x, y, 15, 15)
-    }))
-    
-  }, [])
-
   return (
-    <canvas style={{ height: 400, width: "80%" }}>
+    <div>
       <div
         style={{
           display: "flex",
@@ -388,7 +388,7 @@ const Home = ({ ghosts, player, coins, setCoins, moveRef }) => {
           })}
         </div>
       </div>
-    </canvas>
+    </div>
   );
 };
 
