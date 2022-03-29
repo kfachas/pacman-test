@@ -73,35 +73,6 @@ const getShortestRoad = (ghost, player, ghosts) => {
     updateVisited: ghost.updateVisited,
   };
 
-  // let dRow = [-1, 1, 0, 0];
-  // let dCol = [0, 0, -1, 1];
-  // const visited = [{ x: entity.x, y: entity.y }];
-  // const Q = [{ x: entity.x, y: entity.y }];
-
-  // let distance = Array(map.length)
-  //   .fill()
-  //   .map(() => Array(map[0].length).fill(-1));
-
-  // distance[entity.y][entity.x] = 0;
-
-  // while (Q.length > 0) {
-  //   let cur = Q.shift();
-  //   let row = cur.x;
-  //   let col = cur.y;
-  //   for (let k = 0; k < 4; k++) {
-  //     let newRow = row + dRow[k];
-  //     let newCol = col + dCol[k];
-  //     if (
-  //       !visited.find((e) => e.x === newRow && e.y === newCol) &&
-  //       !notInMap(newCol, newRow)
-  //     ) {
-  //       visited.push({ x: newRow, y: newCol });
-  //       distance[newCol][newRow] = distance[col][row] + 1;
-  //       Q.push({ x: newRow, y: newCol });
-  //     }
-  //   }
-  // }
-
   ghost.updateVisited({ x: entity.x, y: entity.y });
 
   //  FOR APPROVE THAT
@@ -146,6 +117,7 @@ function draw_pacman(ctx, radius, mouth) {
   ctx.stroke();
   ctx.restore();
 }
+
 function draw_ghost(ctx, radius, options) {
   options = options || {};
   let feet = options.feet || 4;
@@ -382,7 +354,6 @@ const Canvas = () => {
       if (!map[y + 1]) {
         return false;
       }
-      y === 9 && console.log(map[y + 1]);
       return map[y + 1][x] === 1;
     };
     const leftIsBlock = (y, x) => {
@@ -609,7 +580,7 @@ const Canvas = () => {
               x: Math.floor(ghost.nextCase.x * 40) + 20,
               y: Math.floor(ghost.nextCase.y * 40) + 20,
             };
-            const ghostSpeed = 2;
+            const ghostSpeed = 1;
             if (
               ghost.position.x !== ghost.nextCase.x ||
               ghost.position.y !== ghost.nextCase.y
@@ -649,7 +620,7 @@ const Canvas = () => {
       player.velocity.y = 0;
 
       const nextPositionPossible = player.radius + 5;
-      const pacmanSpeed = 2.5;
+      const pacmanSpeed = 1;
       if (keyPress === "U" && player.position.y > nextPositionPossible) {
         for (let i = 0; i < boundaries.length; i++) {
           const boundary = boundaries[i];
