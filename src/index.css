@@ -10,6 +10,12 @@
   background-color: gray;
 }
 
-canvas {
-  border: 20px solid #4040bf;
+#root {
+  background-color: black !important;
+  color: white !important;
+}
+#canvasCaseBreaker {
+  border: 5px solid white;
+  /* border: 10px solid black; */
+  /* border: 10px solid #183dd0; */
 }

@@ -3,7 +3,8 @@ import React, { useState, useEffect, useRef } from "react";
 import { getRandomNum, DEFAULT_MATRIX } from "./constants";
 
 import Home from "./components/Home";
-import Canvas from "./components/Canvas";
+import Canvas from "./components/Pac-Man";
+import CaseBreaker from "./components/CaseBreaker";
 
 class Ghost {
   constructor(id, positionX, positionY) {
@@ -103,13 +104,19 @@ function App() {
   const [ghosts, setGhosts] = useState([]);
   const [coins, setCoins] = useState([]);
   const [time, setTime] = useState(getTime());
-  const [isPlaying, setIsPlaying] = useState(false);
+  const [playHtml, setPlayHtml] = useState(false);
   const [playCanvas, setPlayCanvas] = useState(false);
+  const [playCaseBreaker, setPlayCaseBreaker] = useState(false);
+  const isPlaying = playCanvas || playCaseBreaker || playCanvas;
 
   const playerRef = useRef(new Player(5, 0, 0));
   const player = playerRef.current;
 
   const moveRef = useRef();
+
+  useEffect(() => {
+    setPlayCaseBreaker(true);
+  }, []);
 
   const handleKeyPlayer = (code) => {
     let newType = null;
@@ -150,7 +157,7 @@ function App() {
   }, [coins]);
 
   useEffect(() => {
-    if (isPlaying) {
+    if (playHtml) {
       for (let i = 1; i <= 4; i++) {
         let elem = getSpawnPoint();
         while (!elem) {
@@ -181,7 +188,7 @@ function App() {
 
       setTimeout(() => setLoading(false), 950);
     }
-  }, [isPlaying]);
+  }, [playHtml]);
 
   return (
     <div
@@ -192,21 +199,25 @@ function App() {
       <div style={{ textAlign: "center", width: "100%", paddingTop: 12 }}>
         {time}
       </div>
-      {(isPlaying || playCanvas) && (
+      {isPlaying && (
         <button
           onClick={() => {
-            isPlaying && setIsPlaying(false);
+            playHtml && setPlayHtml(false);
             playCanvas && setPlayCanvas(false);
+            playCaseBreaker && setPlayCaseBreaker(false);
           }}
         >
           RETOUR AU MENU
         </button>
       )}
-      {!isPlaying && !playCanvas && (
-        <button onClick={() => setIsPlaying(true)}>HTML ELEMENT</button>
+      {!isPlaying && (
+        <button onClick={() => setPlayHtml(true)}>HTML ELEMENT</button>
       )}
-      {!playCanvas && !isPlaying && (
+      {!isPlaying && (
         <button onClick={() => setPlayCanvas(true)}>CANVAS</button>
+      )}
+      {!isPlaying && (
+        <button onClick={() => setPlayCaseBreaker(true)}>CASSE BRIQUE</button>
       )}
       {player.lose && (
         <div style={{ position: "absolute", left: "45%", top: "45%" }}>
@@ -230,9 +241,9 @@ function App() {
         </div>
         <div style={{ textAlign: "center" }}>
           {playCanvas && <Canvas />}
-          {isPlaying && loading
+          {playHtml && loading
             ? "chargement...."
-            : isPlaying &&
+            : playHtml &&
               !loading && (
                 <Home
                   setScoreNb={setScoreNb}
@@ -243,6 +254,7 @@ function App() {
                   moveRef={moveRef}
                 />
               )}
+          {playCaseBreaker && <CaseBreaker />}
         </div>
       </div>
     </div>
