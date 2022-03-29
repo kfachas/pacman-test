@@ -114,10 +114,6 @@ function App() {
 
   const moveRef = useRef();
 
-  useEffect(() => {
-    setPlayCaseBreaker(true);
-  }, []);
-
   const handleKeyPlayer = (code) => {
     let newType = null;
 
@@ -192,7 +188,7 @@ function App() {
 
   return (
     <div
-      style={{ height: "100%" }}
+      style={{ height: "100%", overflow: "hidden" }}
       onKeyDown={(e) => !player.lose && handleKeyPlayer(e.code)}
       tabIndex={0}
     >
@@ -237,7 +233,9 @@ function App() {
             Score : <span id="score">{scoreNb}</span>
           </span>
           <div style={{ margin: "0 12px" }}>|</div>
-          <span>Vies : {player.lifes}</span>
+          <span>
+            Vies : <span id="lifes">{player.lifes}</span>
+          </span>
         </div>
         <div style={{ textAlign: "center" }}>
           {playCanvas && <Canvas />}

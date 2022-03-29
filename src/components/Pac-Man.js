@@ -1,7 +1,9 @@
 import React, { useEffect } from "react";
-import { DEFAULT_MATRIX as map } from "../constants";
-
-import * as boundariesImg from "../images/box/index.js";
+import {
+  circleCollidesWithEntity,
+  DEFAULT_MATRIX as map,
+  findRightImage,
+} from "../constants";
 
 function manhattanDist(x, y) {
   let dist = Math.abs(x) + Math.abs(y);
@@ -188,13 +190,9 @@ const Canvas = () => {
         this.mouth = 0;
         this.time = 0;
         this.angle = 0;
+        this.loseALife = false;
       }
       draw() {
-        // ctx.beginPath();
-        // ctx.arc(this.position.x, this.position.y, this.radius, 0, Math.PI * 2);
-        // ctx.fillStyle = "yellow";
-        // ctx.fill();
-        // ctx.closePath();
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
         ctx.rotate(this.angle);
@@ -203,27 +201,30 @@ const Canvas = () => {
       }
 
       update(elapsed) {
-        if (elapsed && (this.velocity.x !== 0 || this.velocity.y !== 0)) {
-          this.time = elapsed;
-        } else {
-          this.time = 0;
-        }
-        let newAngle = 0;
-        if (this.velocity.x < 0) {
-          newAngle = Math.PI;
-        } else if (this.velocity.y > 0) {
-          newAngle = 0.5 * Math.PI;
-        } else if (this.velocity.y < 0) {
-          newAngle = 1.5 * Math.PI;
-        }
-        this.angle = newAngle;
+        if (!this.loseALife) {
+          if (elapsed && (this.velocity.x !== 0 || this.velocity.y !== 0)) {
+            this.time = elapsed;
+          } else {
+            this.time = 0;
+          }
+          let newAngle = 0;
+          if (this.velocity.x < 0) {
+            newAngle = Math.PI;
+          } else if (this.velocity.y > 0) {
+            newAngle = 0.5 * Math.PI;
+          } else if (this.velocity.y < 0) {
+            newAngle = 1.5 * Math.PI;
+          }
+          this.angle = newAngle;
 
-        this.position.x += this.velocity.x;
-        this.position.y += this.velocity.y;
-        this.mouth = Math.abs(Math.sin(2 * Math.PI * this.time));
+          this.position.x += this.velocity.x;
+          this.position.y += this.velocity.y;
+          this.mouth = Math.abs(Math.sin(2 * Math.PI * this.time));
+        }
 
         this.draw();
       }
+
       updateScore() {
         this.score += 10;
       }
@@ -297,7 +298,7 @@ const Canvas = () => {
         this.visited = [];
       }
 
-      updateTest(res) {
+      newCase(res) {
         this.nextCase = res;
       }
       update() {
@@ -309,7 +310,6 @@ const Canvas = () => {
     canvas.height = 600;
 
     let keyPress;
-
     let lastKeyPress;
 
     addEventListener("keydown", ({ key }) => {
@@ -332,6 +332,7 @@ const Canvas = () => {
 
     const boundaries = [];
     const coins = [];
+
     const ghosts = Array.from(
       { length: 1 },
       () =>
@@ -344,144 +345,10 @@ const Canvas = () => {
         )
     );
 
-    const topIsBlock = (y, x) => {
-      if (!map[y - 1]) {
-        return false;
-      }
-      return map[y - 1][x] === 1;
-    };
-    const bottomIsBlock = (y, x) => {
-      if (!map[y + 1]) {
-        return false;
-      }
-      return map[y + 1][x] === 1;
-    };
-    const leftIsBlock = (y, x) => {
-      if (typeof map[y][x - 1] === "undefined") {
-        return false;
-      }
-      return map[y][x - 1] === 1;
-    };
-    const rightIsBlock = (y, x) => {
-      if (typeof map[y][x + 1] === "undefined") {
-        return false;
-      }
-      return map[y][x + 1] === 1;
-    };
-
     map.forEach((row, y) =>
       row.forEach((elem, x) => {
         if (elem === 1) {
-          // boundary who dont have neighbor
-          let image = new Image();
-          if (
-            topIsBlock(y, x) &&
-            !leftIsBlock(y, x) &&
-            !rightIsBlock(y, x) &&
-            !bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.capBottom;
-          } else if (
-            !topIsBlock(y, x) &&
-            !leftIsBlock(y, x) &&
-            !rightIsBlock(y, x) &&
-            bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.capTop;
-          } else if (
-            !topIsBlock(y, x) &&
-            leftIsBlock(y, x) &&
-            !rightIsBlock(y, x) &&
-            !bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.capRight;
-          } else if (
-            !topIsBlock(y, x) &&
-            !leftIsBlock(y, x) &&
-            rightIsBlock(y, x) &&
-            !bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.capLeft;
-          } else if (
-            topIsBlock(y, x) &&
-            leftIsBlock(y, x) &&
-            !rightIsBlock(y, x) &&
-            !bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeCorner3;
-          } else if (
-            topIsBlock(y, x) &&
-            !leftIsBlock(y, x) &&
-            rightIsBlock(y, x) &&
-            !bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeCorner4;
-          } else if (
-            !topIsBlock(y, x) &&
-            !leftIsBlock(y, x) &&
-            rightIsBlock(y, x) &&
-            bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeCorner1;
-          } else if (
-            !topIsBlock(y, x) &&
-            leftIsBlock(y, x) &&
-            !rightIsBlock(y, x) &&
-            bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeCorner2;
-          } else if (
-            topIsBlock(y, x) &&
-            !leftIsBlock(y, x) &&
-            !rightIsBlock(y, x) &&
-            bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeVertical;
-          } else if (
-            !topIsBlock(y, x) &&
-            leftIsBlock(y, x) &&
-            rightIsBlock(y, x) &&
-            !bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeHorizontal;
-          } else if (
-            topIsBlock(y, x) &&
-            leftIsBlock(y, x) &&
-            rightIsBlock(y, x) &&
-            !bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeConnectorTop;
-          } else if (
-            !topIsBlock(y, x) &&
-            leftIsBlock(y, x) &&
-            rightIsBlock(y, x) &&
-            bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeConnectorBottom;
-          } else if (
-            topIsBlock(y, x) &&
-            !leftIsBlock(y, x) &&
-            rightIsBlock(y, x) &&
-            bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeConnectorRight;
-          } else if (
-            topIsBlock(y, x) &&
-            leftIsBlock(y, x) &&
-            !rightIsBlock(y, x) &&
-            bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeConnectorLeft;
-          } else if (
-            topIsBlock(y, x) &&
-            leftIsBlock(y, x) &&
-            rightIsBlock(y, x) &&
-            bottomIsBlock(y, x)
-          ) {
-            image.src = boundariesImg.pipeCross;
-          } else {
-            image.src = boundariesImg.block;
-          }
+          const imageOfBoundary = findRightImage(y, x);
 
           boundaries.push(
             new Boundary(
@@ -489,7 +356,7 @@ const Canvas = () => {
                 x: Boundary.width * x,
                 y: Boundary.height * y,
               },
-              image
+              imageOfBoundary
             )
           );
         }
@@ -505,26 +372,26 @@ const Canvas = () => {
       })
     );
 
-    const circleCollidesWithEntity = (circle, entity) => {
-      return (
-        circle.position.y - circle.radius + circle.velocity.y <=
-          entity.position.y + entity.height &&
-        circle.position.x + circle.radius + circle.velocity.x >=
-          entity.position.x &&
-        circle.position.y + circle.radius + circle.velocity.y >=
-          entity.position.y &&
-        circle.position.x - circle.radius + circle.velocity.x <=
-          entity.position.x + entity.width
-      );
-    };
-
     let previous,
       elapsed,
       animationId,
-      playerLifes = 3;
+      playerLifes = 3,
+      lastSecond = 0;
+
+    function playerLoseALife() {
+      const lifesElem = document.getElementById("lifes");
+      playerLifes -= 1;
+      lifesElem.innerText = playerLifes;
+      !player.loseALife && (player.loseALife = true);
+
+      // animationId = requestAnimationFrame(animationLoop);
+    }
 
     function animationLoop(timestamp) {
-      // if (gameOver) return
+      if (playerLifes === 0) {
+        return cancelAnimationFrame(animationId);
+      }
+
       if (!previous) previous = timestamp;
 
       elapsed = timestamp - previous;
@@ -556,23 +423,58 @@ const Canvas = () => {
 
       player.update(elapsed / 1000);
 
-      ghosts.forEach((ghost) => {
+      if (player.radius === 0 && playerLifes > 0) {
+        player.loseALife = false;
+        setTimeout(() => {
+          player.position.x = (Boundary.width * 9) / 2;
+          player.position.y = (Boundary.height * 9) / 2;
+          player.radius = 15;
+          ghosts.forEach((ghost) => {
+            ghost.position.x = Boundary.width * 3 - 40 / 2;
+            ghost.position.y = Boundary.height * 3 - 40 / 2;
+          });
+          lastKeyPress = null;
+          keyPress = null;
+          animationId = requestAnimationFrame(animationLoop);
+        }, 1500);
+        cancelAnimationFrame(animationId);
+      }
+
+      const actualSecond = Math.round(elapsed / 45);
+
+      if (
+        player.loseALife &&
+        player.radius > 0 &&
+        lastSecond !== actualSecond
+      ) {
+        player.radius -= 1;
+        player.angle += 1;
+      }
+
+      if (actualSecond !== lastSecond) lastSecond = actualSecond;
+
+      ghosts.forEach(async (ghost) => {
         ghost.update();
+        if (player.loseALife) {
+          ghost.nextCase = null;
+          player.velocity.x = 0;
+          player.velocity.y = 0;
+        }
 
         if (
           Math.hypot(
             ghost.position.x - player.position.x,
             ghost.position.y - player.position.y
           ) <
-          ghost.radius + player.radius
+            ghost.radius + player.radius &&
+          !player.loseALife
         ) {
-          playerLifes -= 1;
-          cancelAnimationFrame(animationId);
+          playerLoseALife();
         }
         if (!ghost.nextCase) {
           const res = getShortestRoad(ghost, player);
           if (res) {
-            ghost.updateTest(res);
+            ghost.newCase(res);
           }
         } else {
           if (ghost.nextCase) {
@@ -601,15 +503,13 @@ const Canvas = () => {
                 }
               }
             }
-
             if (
               newRes.x === ghost.position.x &&
               newRes.y === ghost.position.y
             ) {
               const res = getShortestRoad(ghost, player);
-
               if (res) {
-                ghost.updateTest(res);
+                ghost.newCase(res);
               }
             }
           }
@@ -620,7 +520,7 @@ const Canvas = () => {
       player.velocity.y = 0;
 
       const nextPositionPossible = player.radius + 5;
-      const pacmanSpeed = 1;
+      const pacmanSpeed = 2;
       if (keyPress === "U" && player.position.y > nextPositionPossible) {
         for (let i = 0; i < boundaries.length; i++) {
           const boundary = boundaries[i];

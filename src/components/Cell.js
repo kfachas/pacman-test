@@ -4,7 +4,6 @@ import ghost_1 from "../images/G1.gif";
 import canBeEat from "../images/canBeEat.gif";
 import coin from "../images/bitcoin.png";
 
-
 const MOVE_UP = "MOVE_UP";
 const MOVE_DOWN = "MOVE_DOWN";
 const MOVE_LEFT = "MOVE_LEFT";
@@ -18,26 +17,25 @@ const styles = {
   },
 };
 
-
 const PACKMAN_WIDTH = 10;
 const PACKMAN_COLOR = "yellow";
 
 const stylesForPacman = {
-    borderStyle: "solid",
-    width: 0,
-    height: 0,
-    borderRightWidth: PACKMAN_WIDTH,
-    borderRightColor: "transparent",
-    borderTopWidth: PACKMAN_WIDTH,
-    borderTopColor: PACKMAN_COLOR,
-    borderLeftWidth: PACKMAN_WIDTH,
-    borderLeftColor: PACKMAN_COLOR,
-    borderBottomWidth: PACKMAN_WIDTH,
-    borderBottomColor: PACKMAN_COLOR,
-    borderTopLeftRadius: PACKMAN_WIDTH,
-    borderTopRightRadius: PACKMAN_WIDTH,
-    borderBottomLeftRadius: PACKMAN_WIDTH,
-    borderBottomRightRadius: PACKMAN_WIDTH,
+  borderStyle: "solid",
+  width: 0,
+  height: 0,
+  borderRightWidth: PACKMAN_WIDTH,
+  borderRightColor: "transparent",
+  borderTopWidth: PACKMAN_WIDTH,
+  borderTopColor: PACKMAN_COLOR,
+  borderLeftWidth: PACKMAN_WIDTH,
+  borderLeftColor: PACKMAN_COLOR,
+  borderBottomWidth: PACKMAN_WIDTH,
+  borderBottomColor: PACKMAN_COLOR,
+  borderTopLeftRadius: PACKMAN_WIDTH,
+  borderTopRightRadius: PACKMAN_WIDTH,
+  borderBottomLeftRadius: PACKMAN_WIDTH,
+  borderBottomRightRadius: PACKMAN_WIDTH,
 };
 
 const Pacman = ({ style }) => {
