@@ -5,6 +5,7 @@ import { getRandomNum, DEFAULT_MATRIX } from "./constants";
 import Home from "./components/Home";
 import Canvas from "./components/Pac-Man";
 import CaseBreaker from "./components/CaseBreaker";
+import RayCaster from "./components/RayCaster.js";
 
 class Ghost {
   constructor(id, positionX, positionY) {
@@ -107,7 +108,9 @@ function App() {
   const [playHtml, setPlayHtml] = useState(false);
   const [playCanvas, setPlayCanvas] = useState(false);
   const [playCaseBreaker, setPlayCaseBreaker] = useState(false);
-  const isPlaying = playCanvas || playCaseBreaker || playCanvas;
+  const [playRayCaster, setPlayRayCaster] = useState(false);
+  const isPlaying =
+    playCanvas || playCaseBreaker || playCanvas || playRayCaster;
 
   const playerRef = useRef(new Player(5, 0, 0));
   const player = playerRef.current;
@@ -198,6 +201,7 @@ function App() {
       {isPlaying && (
         <button
           onClick={() => {
+            playRayCaster && setPlayRayCaster(false);
             playHtml && setPlayHtml(false);
             playCanvas && setPlayCanvas(false);
             playCaseBreaker && setPlayCaseBreaker(false);
@@ -215,28 +219,34 @@ function App() {
       {!isPlaying && (
         <button onClick={() => setPlayCaseBreaker(true)}>CASSE BRIQUE</button>
       )}
-      {player.lose && (
+      {!isPlaying && (
+        <button onClick={() => setPlayRayCaster(true)}>RAY CASTER</button>
+      )}
+      {playHtml && player.lose && (
         <div style={{ position: "absolute", left: "45%", top: "45%" }}>
           VOUS AVEZ PERDU
         </div>
       )}
       <div style={{ height: "70%" }}>
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "flex-end",
-            height: "30%",
-          }}
-        >
-          <span>
-            Score : <span id="score">{scoreNb}</span>
-          </span>
-          <div style={{ margin: "0 12px" }}>|</div>
-          <span>
-            Vies : <span id="lifes">{player.lifes}</span>
-          </span>
-        </div>
+        {(playHtml || playCanvas) && (
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "flex-end",
+              height: "30%",
+            }}
+          >
+            <span>
+              Score : <span id="score">{scoreNb}</span>
+            </span>
+            <div style={{ margin: "0 12px" }}>|</div>
+            <span>
+              Vies : <span id="lifes">{player.lifes}</span>
+            </span>
+          </div>
+        )}
+
         <div style={{ textAlign: "center" }}>
           {playCanvas && <Canvas />}
           {playHtml && loading
@@ -253,6 +263,7 @@ function App() {
                 />
               )}
           {playCaseBreaker && <CaseBreaker />}
+          {playRayCaster && <RayCaster />}
         </div>
       </div>
     </div>

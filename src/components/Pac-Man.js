@@ -191,7 +191,9 @@ const Canvas = () => {
         this.time = 0;
         this.angle = 0;
         this.loseALife = false;
+        this.speed = 2;
       }
+
       draw() {
         ctx.save();
         ctx.translate(this.position.x, this.position.y);
@@ -268,19 +270,20 @@ const Canvas = () => {
 
     const player = new Player(
       {
-        x: (Boundary.width * 9) / 2,
-        y: (Boundary.height * 9) / 2,
+        x: 2 * 40 - 20,
+        y: 7 * 40 - 20,
       },
       { x: 0, y: 0 }
     );
 
     class Ghost {
-      constructor(position, velocity) {
+      constructor(position) {
         this.position = position;
         this.radius = 15;
         this.visited = [];
         this.nextCase = null;
         this.color = "red";
+        this.speed = 1;
       }
       draw() {
         ctx.save();
@@ -336,13 +339,10 @@ const Canvas = () => {
     const ghosts = Array.from(
       { length: 1 },
       () =>
-        new Ghost(
-          {
-            x: Boundary.width * 3 - 40 / 2,
-            y: Boundary.height * 3 - 40 / 2,
-          },
-          { x: 0, y: 0 }
-        )
+        new Ghost({
+          x: 8 * 40 + 20,
+          y: 5 * 40 + 20,
+        })
     );
 
     map.forEach((row, y) =>
@@ -387,6 +387,61 @@ const Canvas = () => {
       // animationId = requestAnimationFrame(animationLoop);
     }
 
+    const canChasePlayer = (type, playerP, ghostP) => {
+      if (type === "row") {
+        if (playerP.x < ghostP.x) {
+          const mapFormat = map[playerP.y].slice(playerP.x, ghostP.x + 1);
+          const findBlock = mapFormat.find((elem) => elem === 1);
+          if (findBlock) return false;
+          else return true;
+        }
+        if (playerP.x > ghostP.x) {
+          const mapFormat = map[playerP.y].slice(ghostP.x, playerP.x + 1);
+          const findBlock = mapFormat.find((elem) => elem === 1);
+          if (findBlock) return false;
+          else return true;
+        }
+      } else if (type === "column") {
+        if (playerP.y < ghostP.y) {
+          const mapFormat = map.slice(playerP.y, ghostP.y + 1);
+          const findBlock = mapFormat.find((row) => row[playerP.x] === 1);
+          if (findBlock) return false;
+          else return true;
+        }
+        if (playerP.y > ghostP.y) {
+          const mapFormat = map.slice(ghostP.y, playerP.y + 1);
+          const findBlock = mapFormat.find((row) => row[playerP.x] === 1);
+          if (findBlock) return false;
+          else return true;
+        }
+      }
+    };
+
+    const playerPosition = (playerPosition) => ({
+      x: Math.floor(playerPosition.x / 40),
+      y: Math.floor(playerPosition.y / 40),
+    });
+    const ghostPosition = (ghost) => ({
+      x: Math.floor(ghost.x / 40),
+      y: Math.floor(ghost.y / 40),
+    });
+
+    const lastKeyIsPossible = (key, entity) => {
+      switch (key) {
+        case "U":
+          if (map[entity.y - 1][entity.x] === 0) return true;
+        case "L":
+          if (map[entity.y][entity.x - 1] === 0) return true;
+        case "R":
+          if (map[entity.y][entity.x + 1] === 0) return true;
+        case "D":
+          if (map[entity.y + 1][entity.x] === 0) return true;
+        default:
+          break;
+      }
+      return false;
+    };
+
     function animationLoop(timestamp) {
       if (playerLifes === 0) {
         return cancelAnimationFrame(animationId);
@@ -422,16 +477,17 @@ const Canvas = () => {
       });
 
       player.update(elapsed / 1000);
+      const playerFormat = playerPosition(player.position);
 
       if (player.radius === 0 && playerLifes > 0) {
         player.loseALife = false;
         setTimeout(() => {
-          player.position.x = (Boundary.width * 9) / 2;
-          player.position.y = (Boundary.height * 9) / 2;
+          player.position.x = 2 * 40 - 20;
+          player.position.y = 7 * 40 - 20;
           player.radius = 15;
           ghosts.forEach((ghost) => {
-            ghost.position.x = Boundary.width * 3 - 40 / 2;
-            ghost.position.y = Boundary.height * 3 - 40 / 2;
+            ghost.position.x = 8 * 40 + 20;
+            ghost.position.y = 5 * 40 + 20;
           });
           lastKeyPress = null;
           keyPress = null;
@@ -455,12 +511,31 @@ const Canvas = () => {
 
       ghosts.forEach(async (ghost) => {
         ghost.update();
+        const ghostFormat = ghostPosition(ghost.position);
+
+        if (
+          ghostFormat.x !== playerFormat.x &&
+          ghostFormat.y === playerFormat.y
+        ) {
+          if (canChasePlayer("row", playerFormat, ghostFormat)) {
+            console.log("canChasePlayerX", true);
+          }
+        }
+        if (
+          ghostFormat.y !== playerFormat.y &&
+          ghostFormat.x === playerFormat.x
+        ) {
+          if (canChasePlayer("column", playerFormat, ghostFormat)) {
+            console.log("canChasePlayerY", true);
+          }
+        }
         if (player.loseALife) {
           ghost.nextCase = null;
           player.velocity.x = 0;
           player.velocity.y = 0;
         }
 
+        // if collision between ghost and player
         if (
           Math.hypot(
             ghost.position.x - player.position.x,
@@ -482,24 +557,23 @@ const Canvas = () => {
               x: Math.floor(ghost.nextCase.x * 40) + 20,
               y: Math.floor(ghost.nextCase.y * 40) + 20,
             };
-            const ghostSpeed = 1;
             if (
               ghost.position.x !== ghost.nextCase.x ||
               ghost.position.y !== ghost.nextCase.y
             ) {
               if (ghost.position.x < newRes.x) {
-                ghost.position.x += ghostSpeed;
+                ghost.position.x += ghost.speed;
               }
               if (ghost.position.x > newRes.x) {
-                ghost.position.x -= ghostSpeed;
+                ghost.position.x -= ghost.speed;
               }
               if (ghost.position.x === newRes.x) {
                 if (ghost.position.y < newRes.y) {
-                  ghost.position.y += ghostSpeed;
+                  ghost.position.y += ghost.speed;
                 }
 
                 if (ghost.position.y > newRes.y) {
-                  ghost.position.y -= ghostSpeed;
+                  ghost.position.y -= ghost.speed;
                 }
               }
             }
@@ -520,7 +594,7 @@ const Canvas = () => {
       player.velocity.y = 0;
 
       const nextPositionPossible = player.radius + 5;
-      const pacmanSpeed = 2;
+
       if (keyPress === "U" && player.position.y > nextPositionPossible) {
         for (let i = 0; i < boundaries.length; i++) {
           const boundary = boundaries[i];
@@ -531,10 +605,10 @@ const Canvas = () => {
             )
           ) {
             player.velocity.y = 0;
-            keyPress = lastKeyPress;
+            if (lastKeyPress !== "D") keyPress = lastKeyPress;
             break;
           } else {
-            player.velocity.y = -pacmanSpeed;
+            player.velocity.y = -player.speed;
           }
         }
       } else if (
@@ -550,10 +624,10 @@ const Canvas = () => {
             )
           ) {
             player.velocity.x = 0;
-            keyPress = lastKeyPress;
+            if (lastKeyPress !== "L") keyPress = lastKeyPress;
             break;
           } else {
-            player.velocity.x = pacmanSpeed;
+            player.velocity.x = player.speed;
           }
         }
       } else if (keyPress === "L" && player.position.x > nextPositionPossible) {
@@ -566,10 +640,10 @@ const Canvas = () => {
             )
           ) {
             player.velocity.x = 0;
-            keyPress = lastKeyPress;
+            if (lastKeyPress !== "R") keyPress = lastKeyPress;
             break;
           } else {
-            player.velocity.x = -pacmanSpeed;
+            player.velocity.x = -player.speed;
           }
         }
       } else if (
@@ -585,10 +659,10 @@ const Canvas = () => {
             )
           ) {
             player.velocity.y = 0;
-            keyPress = lastKeyPress;
+            if (lastKeyPress !== "U") keyPress = lastKeyPress;
             break;
           } else {
-            player.velocity.y = pacmanSpeed;
+            player.velocity.y = player.speed;
           }
         }
       } else {
